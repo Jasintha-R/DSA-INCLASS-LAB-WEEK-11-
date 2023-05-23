@@ -1,0 +1,93 @@
+#include <limits.h>
+#include <stdbool.h>
+#include <stdio.h>
+
+#define V 6  // Number of vertices in the graph
+
+// Utility function to find the vertex with the minimum key value, from the set of vertices not yet included in MST
+int findMinimumKey(int key[], bool mstSet[])
+{
+    int min = INT_MAX;
+    int minIndex;
+
+    for (int v = 0; v < V; v++)
+    {
+        if (mstSet[v] == false && key[v] < min)
+        {
+            min = key[v];
+            minIndex = v;
+        }
+    }
+
+    return minIndex;
+}
+
+// Utility function to print the constructed MST stored in parent[]
+void printMST(int parent[], int graph[V][V])
+{
+    printf("Edge \tWeight\n");
+    for (int i = 1; i < V; i++)
+    {
+        printf("%d - %d \t%d \n", parent[i], i, graph[i][parent[i]]);
+    }
+}
+
+// Function to construct and print MST for a graph represented using adjacency matrix representation
+void primMST(int graph[V][V])
+{
+    int parent[V];     // Array to store constructed MST
+    int key[V];        // Key values used to pick the minimum weight edge in a cut
+    bool mstSet[V];    // Array to represent the set of vertices included in MST
+
+    // Initialize all keys as infinite and MST set as false
+    for (int i = 0; i < V; i++)
+    {
+        key[i] = INT_MAX;
+        mstSet[i] = false;
+    }
+
+    // Always include the first vertex in MST
+    key[0] = 0;
+    parent[0] = -1;    // First node is always the root of MST
+
+    // MST will have V vertices
+    for (int count = 0; count < V - 1; count++)
+    {
+        // Pick the vertex with the minimum key value from the set of vertices not yet included in MST
+        int u = findMinimumKey(key, mstSet);
+
+        // Add the picked vertex to the MST set
+        mstSet[u] = true;
+
+        // Update key values and parent index of the adjacent vertices of the picked vertex
+        for (int v = 0; v < V; v++)
+        {
+            // Consider only those vertices which are not yet included in MST and have a non-zero edge
+            if (graph[u][v] && mstSet[v] == false && graph[u][v] < key[v])
+            {
+                parent[v] = u;
+                key[v] = graph[u][v];
+            }
+        }
+    }
+
+    // Print the constructed MST
+    printMST(parent, graph);
+}
+
+// Driver's code
+int main()
+{
+    int graph[V][V] = { { 0, 3, 0, 0, 0 , 1},
+                        { 3, 0, 2, 1, 10, 0 },
+                        { 0, 2, 0, 3, 0, 5 },
+                        { 0, 1, 3, 0, 5, 0},
+                        { 0, 10, 0, 5, 0, 4 },
+                        { 1, 0, 5, 0, 4, 0} };
+
+    // Print the solution
+    primMST(graph);
+
+    return 0;
+}
+
